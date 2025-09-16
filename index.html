@@ -1,458 +1,506 @@
-```jsx
-import { useState, useEffect } from 'react';
-import { Home, FileText, Briefcase, Settings, LogIn, LogOut, User, Edit, Plus, Trash, Download, Menu, X } from 'lucide-react';
-import { motion } from 'framer-motion';
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网申一键通 - 简化你的求职流程</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --background: #f0f2f5;
+            --foreground: #1f2937;
+            --card: #ffffff;
+            --primary: #3b82f6;
+            --primary-foreground: #ffffff;
+            --border: #e5e7eb;
+            --muted-foreground: #6b7280;
+        }
+        body {
+            background-color: var(--background);
+            color: var(--foreground);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        }
+        .card {
+            background-color: var(--card);
+            border-radius: 0.75rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        .sidebar-icon {
+            stroke-width: 1.5;
+        }
+        .nav-item.active {
+            background-color: var(--primary);
+            color: var(--primary-foreground);
+        }
+        .nav-item.active svg {
+            color: var(--primary-foreground);
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 120px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        /* 隐藏滚动条但保留滚动功能 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
 
-export default function App() {
-  const [currentPage, setCurrentPage] = useState('home');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
-  const [resumeData, setResumeData] = useState('');
-  const [jobs, setJobs] = useState([]);
-
-  useEffect(() => {
-    const savedResume = sessionStorage.getItem('resumeData');
-    if (savedResume) setResumeData(savedResume);
-    
-    const savedJobs = sessionStorage.getItem('jobs');
-    if (savedJobs) setJobs(JSON.parse(savedJobs));
-    
-    const savedLogin = sessionStorage.getItem('isLoggedIn');
-    if (savedLogin) {
-      setIsLoggedIn(true);
-      const savedUser = sessionStorage.getItem('user');
-      if (savedUser) setUser(JSON.parse(savedUser));
-    }
-  }, []);
-
-  const handleResumeUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const content = event.target.result;
-        setResumeData(content);
-        sessionStorage.setItem('resumeData', content);
-      };
-      reader.readAsText(file);
-    }
-  };
-
-  const handleAddJob = () => {
-    const newJob = {
-      id: Date.now(),
-      title: jobTitle,
-      company,
-      salary,
-      description
-    };
-    const updatedJobs = [...jobs, newJob];
-    setJobs(updatedJobs);
-    sessionStorage.setItem('jobs', JSON.stringify(updatedJobs));
-    setJobTitle('');
-    setCompany('');
-    setSalary('');
-    setDescription('');
-  };
-
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-    sessionStorage.setItem('isLoggedIn', 'true');
-    sessionStorage.setItem('user', JSON.stringify({ name: username }));
-    setUser({ name: username });
-    setCurrentPage('home');
-  };
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    sessionStorage.removeItem('isLoggedIn');
-    sessionStorage.removeItem('user');
-    setUser(null);
-  };
-
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [jobTitle, setJobTitle] = useState('');
-  const [company, setCompany] = useState('');
-  const [salary, setSalary] = useState('');
-  const [description, setDescription] = useState('');
-
-  const HomeContent = () => (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">Welcome to JobApp Helper</h1>
-      <p className="text-gray-600 mb-8">Save your resume data and job bookmarks for quick application filling.</p>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100"
-        >
-          <div className="flex items-center mb-4">
-            <FileText className="text-blue-500 mr-3" size={24} />
-            <h3 className="text-xl font-semibold text-gray-800">Resume Management</h3>
-          </div>
-          <p className="text-gray-600 mb-4">Upload your resume to save details for one-click filling.</p>
-          <button 
-            onClick={() => setCurrentPage('resume')}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition"
-          >
-            Manage Resume
-          </button>
-        </motion.div>
-        
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100"
-        >
-          <div className="flex items-center mb-4">
-            <Briefcase className="text-green-500 mr-3" size={24} />
-            <h3 className="text-xl font-semibold text-gray-800">Job Bookmarks</h3>
-          </div>
-          <p className="text-gray-600 mb-4">Save job listings with details for quick reference.</p>
-          <button 
-            onClick={() => setCurrentPage('jobs')}
-            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition"
-          >
-            View Jobs
-          </button>
-        </motion.div>
-      </div>
-    </div>
-  );
-
-  const ResumeContent = () => (
-    <div className="max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Resume Management</h2>
-      <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-100">
-        <div className="flex items-center mb-4">
-          <FileText className="text-blue-500 mr-3" size={24} />
-          <h3 className="text-xl font-semibold">Upload Your Resume</h3>
+    <!-- 侧边栏 -->
+    <aside class="w-20 lg:w-64 bg-white border-r border-gray-200 flex flex-col transition-all duration-300">
+        <div class="flex items-center justify-center h-16 border-b lg:justify-start lg:px-6">
+            <svg class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="ml-3 text-lg font-bold text-gray-800 hidden lg:block">网申一键通</span>
         </div>
-        <div className="mb-6">
-          <input
-            type="file"
-            accept=".txt,.pdf"
-            onChange={handleResumeUpload}
-            className="hidden"
-            id="resume-upload"
-          />
-          <label
-            htmlFor="resume-upload"
-            className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition flex items-center"
-          >
-            <Download className="mr-2" size={16} />
-            Upload Resume
-          </label>
+        <nav class="flex-1 px-3 py-4 space-y-2">
+            <a href="#" id="nav-profile" class="nav-item flex items-center p-3 text-gray-600 rounded-lg hover:bg-gray-100 active">
+                <i data-lucide="user-round" class="sidebar-icon h-6 w-6 text-gray-500"></i>
+                <span class="ml-4 font-medium hidden lg:block">我的简历</span>
+            </a>
+            <a href="#" id="nav-jobs" class="nav-item flex items-center p-3 text-gray-600 rounded-lg hover:bg-gray-100">
+                <i data-lucide="star" class="sidebar-icon h-6 w-6 text-gray-500"></i>
+                <span class="ml-4 font-medium hidden lg:block">岗位收藏</span>
+            </a>
+            <a href="#" id="nav-settings" class="nav-item flex items-center p-3 text-gray-600 rounded-lg hover:bg-gray-100">
+                <i data-lucide="settings" class="sidebar-icon h-6 w-6 text-gray-500"></i>
+                <span class="ml-4 font-medium hidden lg:block">设置</span>
+            </a>
+        </nav>
+        <div class="p-3 border-t">
+             <a href="#" class="flex items-center p-3 text-gray-600 rounded-lg hover:bg-gray-100">
+                <i data-lucide="log-in" class="sidebar-icon h-6 w-6 text-gray-500"></i>
+                <span class="ml-4 font-medium hidden lg:block">登录/注册</span>
+            </a>
         </div>
-        <div className="mb-6">
-          <textarea
-            value={resumeData}
-            onChange={(e) => {
-              setResumeData(e.target.value);
-              sessionStorage.setItem('resumeData', e.target.value);
-            }}
-            className="w-full h-64 p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Resume content will appear here..."
-          />
-        </div>
-        <button
-          className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
-        >
-          Save Resume Data
-        </button>
-      </div>
-      
-      <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-        <div className="flex items-center mb-4">
-          <Edit className="text-purple-500 mr-3" size={24} />
-          <h3 className="text-xl font-semibold">Fill Application Form</h3>
-        </div>
-        <form className="space-y-4">
-          <div>
-            <label className="block text-gray-700 mb-1">Name</label>
-            <input
-              type="text"
-              className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 mb-1">Phone</label>
-            <input
-              type="tel"
-              className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <button
-            type="button"
-            className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition flex items-center"
-          >
-            <Download className="mr-2" size={16} />
-            Fill from Resume
-          </button>
-        </form>
-      </div>
-    </div>
-  );
+    </aside>
 
-  const JobsContent = () => (
-    <div className="max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Job Bookmarks</h2>
-      <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-100">
-        <div className="flex items-center mb-4">
-          <Briefcase className="text-green-500 mr-3" size={24} />
-          <h3 className="text-xl font-semibold">Add New Job</h3>
-        </div>
-        <form className="space-y-4">
-          <div>
-            <label className="block text-gray-700 mb-1">Job Title</label>
-            <input
-              type="text"
-              value={jobTitle}
-              onChange={(e) => setJobTitle(e.target.value)}
-              className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              placeholder="e.g., Senior Software Engineer"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 mb-1">Company</label>
-            <input
-              type="text"
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
-              className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              placeholder="e.g., Tech Company Inc."
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 mb-1">Salary</label>
-            <input
-              type="text"
-              value={salary}
-              onChange={(e) => setSalary(e.target.value)}
-              className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              placeholder="e.g., $120,000/year"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 mb-1">Description</label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              rows="3"
-              placeholder="Job description and requirements..."
-            />
-          </div>
-          <button
-            type="button"
-            onClick={handleAddJob}
-            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition flex items-center"
-          >
-            <Plus className="mr-2" size={16} />
-            Save Job
-          </button>
-        </form>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {jobs.map(job => (
-          <motion.div
-            key={job.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100"
-          >
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="text-xl font-semibold text-gray-800">{job.title}</h3>
-                <p className="text-gray-600">{job.company}</p>
-                <p className="text-green-600 font-medium mt-1">{job.salary}</p>
-              </div>
-              <button className="text-red-500 hover:text-red-700">
-                <Trash size={20} />
-              </button>
+    <!-- 主内容区 -->
+    <div class="flex-1 flex flex-col">
+        <header class="flex items-center justify-between h-16 px-6 bg-white border-b">
+            <h1 id="header-title" class="text-xl font-semibold text-gray-800">我的简历</h1>
+            <div class="flex items-center space-x-4">
+                <button class="p-2 rounded-full hover:bg-gray-100">
+                    <i data-lucide="bell" class="h-6 w-6 text-gray-600"></i>
+                </button>
+                <img src="https://placehold.co/40x40/E2E8F0/4A5568?text=U" alt="用户头像" class="w-10 h-10 rounded-full">
             </div>
-            <p className="text-gray-600 mb-4">{job.description}</p>
-            <button className="text-blue-500 hover:text-blue-700 flex items-center">
-              <Edit size={16} className="mr-1" />
-              Edit Details
-            </button>
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  );
+        </header>
 
-  const SettingsContent = () => (
-    <div className="max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Settings</h2>
-      <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-        <div className="space-y-6">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Theme</h3>
-            <div className="flex space-x-4">
-              <label className="flex items-center">
-                <input type="radio" name="theme" value="light" className="mr-2" checked />
-                Light Mode
-              </label>
-              <label className="flex items-center">
-                <input type="radio" name="theme" value="dark" className="mr-2" />
-                Dark Mode
-              </label>
+        <main id="main-content" class="flex-1 p-6 overflow-y-auto no-scrollbar">
+            <!-- 简历信息视图 -->
+            <div id="view-profile" class="space-y-6">
+                <div class="flex justify-between items-center">
+                    <p class="text-gray-600">在这里管理您的个人信息，方便一键复制到网申表格中。</p>
+                    <div class="flex space-x-2">
+                        <label for="resume-upload" class="cursor-pointer inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-25 transition ease-in-out duration-150">
+                            <i data-lucide="upload" class="mr-2 h-4 w-4"></i>
+                            导入简历
+                        </label>
+                        <input type="file" id="resume-upload" class="hidden"/>
+                        <button id="save-profile-btn" class="inline-flex items-center px-4 py-2 bg-blue-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-600 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <i data-lucide="save" class="mr-2 h-4 w-4"></i>
+                            保存信息
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 简历表单 -->
+                <div class="card p-6">
+                    <form id="profile-form" class="space-y-8">
+                        <div>
+                            <h3 class="text-lg font-semibold border-b pb-2 mb-4">基本信息</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div><label class="block text-sm font-medium text-gray-700">姓名</label><input type="text" data-key="fullName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="张三"></div>
+                                <div><label class="block text-sm font-medium text-gray-700">电话</label><input type="tel" data-key="phone" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="13800138000"></div>
+                                <div><label class="block text-sm font-medium text-gray-700">邮箱</label><input type="email" data-key="email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="example@email.com"></div>
+                                <div><label class="block text-sm font-medium text-gray-700">求职意向</label><input type="text" data-key="jobIntention" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="前端开发工程师"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-semibold border-b pb-2 mb-4">教育背景</h3>
+                            <textarea data-key="education" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" rows="4" placeholder="2018.09 - 2022.06  XX大学  计算机科学与技术  学士"></textarea>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-semibold border-b pb-2 mb-4">工作/实习经历</h3>
+                            <textarea data-key="experience" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" rows="6" placeholder="2021.07 - 2021.10  XX公司  前端开发实习生\n- 负责XX项目的前端开发工作..."></textarea>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-lg font-semibold border-b pb-2 mb-4">自我评价</h3>
+                            <textarea data-key="selfEvaluation" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" rows="4" placeholder="熟练掌握Vue、React等前端框架..."></textarea>
+                        </div>
+                    </form>
+                </div>
             </div>
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Notifications</h3>
-            <label className="flex items-center">
-              <input type="checkbox" className="mr-2" checked />
-              Enable job alerts
-            </label>
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Account</h3>
-            <button className="text-blue-500 hover:text-blue-700 flex items-center">
-              <User size={16} className="mr-1" />
-              Manage Account
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 
-  const LoginContent = () => (
-    <div className="max-w-md mx-auto">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Login</h2>
-      <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-        <div className="space-y-6">
-          <div>
-            <label className="block text-gray-700 mb-1">Username</label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 mb-1">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <button
-            onClick={handleLogin}
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition w-full"
-          >
-            Login
-          </button>
-          <p className="text-center text-gray-500">Don't have an account? <a href="#" className="text-blue-500 hover:underline">Sign up</a></p>
-        </div>
-      </div>
-    </div>
-  );
+            <!-- 岗位收藏视图 -->
+            <div id="view-jobs" class="hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <p class="text-gray-600">集中管理您感兴趣的岗位，跟踪申请进度。</p>
+                    <button id="add-job-btn" class="inline-flex items-center px-4 py-2 bg-blue-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-600">
+                        <i data-lucide="plus" class="mr-2 h-4 w-4"></i>
+                        收藏新岗位
+                    </button>
+                </div>
+                <div id="job-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Job cards will be inserted here -->
+                </div>
+            </div>
 
-  return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <motion.div
-        initial={{ width: 0 }}
-        animate={{ width: isSidebarOpen ? '16rem' : '0' }}
-        transition={{ duration: 0.3 }}
-        className="bg-gradient-to-b from-gray-800 to-gray-900 text-white overflow-hidden"
-        style={{ width: isSidebarOpen ? '16rem' : '0' }}
-      >
-        <div className="p-4">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-xl font-bold">JobApp Helper</h1>
-            <button onClick={() => setIsSidebarOpen(false)} className="md:hidden">
-              <X size={24} />
-            </button>
-          </div>
-          <nav>
-            <button 
-              onClick={() => setCurrentPage('home')} 
-              className={`flex items-center p-2 rounded-lg w-full mb-2 transition ${currentPage === 'home' ? 'bg-blue-600' : 'hover:bg-gray-700'}`}
-            >
-              <Home className="mr-3" size={20} />
-              Home
-            </button>
-            <button 
-              onClick={() => setCurrentPage('resume')} 
-              className={`flex items-center p-2 rounded-lg w-full mb-2 transition ${currentPage === 'resume' ? 'bg-blue-600' : 'hover:bg-gray-700'}`}
-            >
-              <FileText className="mr-3" size={20} />
-              Resume
-            </button>
-            <button 
-              onClick={() => setCurrentPage('jobs')} 
-              className={`flex items-center p-2 rounded-lg w-full mb-2 transition ${currentPage === 'jobs' ? 'bg-blue-600' : 'hover:bg-gray-700'}`}
-            >
-              <Briefcase className="mr-3" size={20} />
-              Jobs
-            </button>
-            <button 
-              onClick={() => setCurrentPage('settings')} 
-              className={`flex items-center p-2 rounded-lg w-full mb-2 transition ${currentPage === 'settings' ? 'bg-blue-600' : 'hover:bg-gray-700'}`}
-            >
-              <Settings className="mr-3" size={20} />
-              Settings
-            </button>
-            {isLoggedIn ? (
-              <button 
-                onClick={handleLogout} 
-                className={`flex items-center p-2 rounded-lg w-full mb-2 transition hover:bg-gray-700`}
-              >
-                <LogOut className="mr-3" size={20} />
-                Logout
-              </button>
-            ) : (
-              <button 
-                onClick={() => setCurrentPage('login')} 
-                className={`flex items-center p-2 rounded-lg w-full mb-2 transition hover:bg-gray-700`}
-              >
-                <LogIn className="mr-3" size={20} />
-                Login
-              </button>
-            )}
-          </nav>
-        </div>
-      </motion.div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Mobile Header */}
-        <div className="md:hidden flex items-center justify-between p-4 border-b border-gray-200">
-          <button onClick={() => setIsSidebarOpen(true)} className="text-gray-600">
-            <Menu size={24} />
-          </button>
-          <h1 className="text-xl font-bold">JobApp Helper</h1>
-          <div className="w-8" />
-        </div>
-        
-        {/* Content Area */}
-        <div className="flex-1 p-6 overflow-auto">
-          {currentPage === 'home' && <HomeContent />}
-          {currentPage === 'resume' && <ResumeContent />}
-          {currentPage === 'jobs' && <JobsContent />}
-          {currentPage === 'settings' && <SettingsContent />}
-          {currentPage === 'login' && <LoginContent />}
-        </div>
-      </div>
+            <!-- 设置视图 -->
+            <div id="view-settings" class="hidden space-y-6">
+                 <div class="card p-6">
+                    <h3 class="text-lg font-semibold border-b pb-2 mb-4">数据管理</h3>
+                    <p class="text-sm text-gray-500 mb-4">所有数据都保存在您的浏览器本地，我们不收集任何信息。</p>
+                    <button id="clear-data-btn" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700">
+                        <i data-lucide="trash-2" class="mr-2 h-4 w-4"></i>
+                        清空所有本地数据
+                    </button>
+                 </div>
+            </div>
+        </main>
     </div>
-  );
-}
-```
+
+    <!-- 添加岗位的 Modal -->
+    <div id="add-job-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">收藏新岗位</h3>
+                <div class="mt-2 px-7 py-3">
+                    <form id="add-job-form" class="text-left space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">岗位链接 (选填)</label>
+                            <input type="url" id="job-url" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm" placeholder="https://example.com/job/123">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">岗位描述/要求</label>
+                            <textarea id="job-description" rows="10" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm" placeholder="请在此处粘贴岗位的详细信息..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="items-center px-4 py-3">
+                    <button id="save-job-btn" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        保存收藏
+                    </button>
+                     <button id="cancel-job-btn" class="mt-2 px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400">
+                        取消
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 确认对话框 Modal -->
+    <div id="confirm-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                    <i data-lucide="alert-triangle" class="h-6 w-6 text-red-600"></i>
+                </div>
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mt-2">确认操作</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p id="confirm-modal-message" class="text-sm text-gray-500"></p>
+                </div>
+                <div class="items-center px-4 py-3 sm:flex">
+                     <button id="confirm-modal-cancel-btn" class="mt-2 sm:mt-0 px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md w-full sm:w-auto shadow-sm hover:bg-gray-300 focus:outline-none">
+                        取消
+                    </button>
+                    <button id="confirm-modal-confirm-btn" class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md w-full sm:w-auto sm:ml-2 shadow-sm hover:bg-red-700 focus:outline-none">
+                        确认
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 提示框 -->
+    <div id="toast" class="fixed top-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-md opacity-0 transform -translate-y-10 transition-all duration-300">
+        操作成功！
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+
+            const app = {
+                // DOM 元素
+                elements: {
+                    navLinks: document.querySelectorAll('.nav-item'),
+                    views: {
+                        profile: document.getElementById('view-profile'),
+                        jobs: document.getElementById('view-jobs'),
+                        settings: document.getElementById('view-settings')
+                    },
+                    headerTitle: document.getElementById('header-title'),
+                    addJobBtn: document.getElementById('add-job-btn'),
+                    cancelJobBtn: document.getElementById('cancel-job-btn'),
+                    saveJobBtn: document.getElementById('save-job-btn'),
+                    jobList: document.getElementById('job-list'),
+                    addJobModal: document.getElementById('add-job-modal'),
+                    jobUrlInput: document.getElementById('job-url'),
+                    jobDescriptionInput: document.getElementById('job-description'),
+                    clearDataBtn: document.getElementById('clear-data-btn'),
+                    resumeUpload: document.getElementById('resume-upload'),
+                    saveProfileBtn: document.getElementById('save-profile-btn'),
+                    profileForm: document.getElementById('profile-form'),
+                    toast: document.getElementById('toast'),
+                    confirmModal: document.getElementById('confirm-modal'),
+                    confirmModalMessage: document.getElementById('confirm-modal-message'),
+                    confirmModalConfirmBtn: document.getElementById('confirm-modal-confirm-btn'),
+                    confirmModalCancelBtn: document.getElementById('confirm-modal-cancel-btn'),
+                },
+
+                // 初始化
+                init() {
+                    // 侧边栏切换
+                    this.elements.navLinks.forEach(link => {
+                        link.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            this.switchTab(link);
+                        });
+                    });
+
+                    // 岗位收藏相关
+                    this.elements.addJobBtn.addEventListener('click', () => this.toggleModal(true));
+                    this.elements.cancelJobBtn.addEventListener('click', () => this.toggleModal(false));
+                    this.elements.saveJobBtn.addEventListener('click', () => this.saveJob());
+
+                    // 自定义确认框取消按钮
+                    this.elements.confirmModalCancelBtn.addEventListener('click', () => {
+                        this.elements.confirmModal.classList.add('hidden');
+                    });
+
+                    // 清空数据
+                    this.elements.clearDataBtn.addEventListener('click', () => this.clearAllData());
+
+                    // 保存简历信息
+                    this.elements.saveProfileBtn.addEventListener('click', () => this.saveProfile());
+
+                    // 导入简历
+                    this.elements.resumeUpload.addEventListener('change', (e) => this.importResume(e));
+
+                    // 渲染初始数据
+                    this.renderProfile();
+                    this.renderJobs();
+                },
+
+                // 侧边栏切换
+                switchTab(link) {
+                    this.elements.navLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                    const id = link.id;
+                    if (id === 'nav-profile') {
+                        this.showView('profile', '我的简历');
+                    } else if (id === 'nav-jobs') {
+                        this.showView('jobs', '岗位收藏');
+                    } else if (id === 'nav-settings') {
+                        this.showView('settings', '设置');
+                    }
+                },
+
+                showView(view, title) {
+                    Object.values(this.elements.views).forEach(v => v.classList.add('hidden'));
+                    this.elements.views[view].classList.remove('hidden');
+                    this.elements.headerTitle.textContent = title;
+                },
+
+                // 岗位 Modal
+                toggleModal(show) {
+                    if (show) {
+                        this.elements.addJobModal.classList.remove('hidden');
+                        this.elements.jobUrlInput.value = '';
+                        this.elements.jobDescriptionInput.value = '';
+                    } else {
+                        this.elements.addJobModal.classList.add('hidden');
+                    }
+                    lucide.createIcons();
+                },
+
+                // 保存岗位
+                saveJob() {
+                    const url = this.elements.jobUrlInput.value.trim();
+                    const desc = this.elements.jobDescriptionInput.value.trim();
+                    if (!desc) {
+                        this.showToast('请填写岗位描述');
+                        return;
+                    }
+                    let jobs = JSON.parse(localStorage.getItem('savedJobs')) || [];
+                    jobs.unshift({
+                        id: Date.now(),
+                        url,
+                        desc
+                    });
+                    localStorage.setItem('savedJobs', JSON.stringify(jobs));
+                    this.toggleModal(false);
+                    this.renderJobs();
+                    this.showToast('岗位已收藏');
+                },
+
+                // 渲染岗位
+                renderJobs() {
+                    let jobs = JSON.parse(localStorage.getItem('savedJobs')) || [];
+                    this.elements.jobList.innerHTML = '';
+                    if (jobs.length === 0) {
+                        this.elements.jobList.innerHTML = '<div class="text-gray-400 col-span-3">暂无收藏岗位</div>';
+                        return;
+                    }
+                    jobs.forEach(job => {
+                        const card = document.createElement('div');
+                        card.className = 'card p-4 flex flex-col space-y-2 relative';
+                        if (job.url) {
+                            card.innerHTML += `<a href="${job.url}" target="_blank" class="text-blue-500 underline break-all mb-1">岗位链接</a>`;
+                        }
+                        card.innerHTML += `<div class="whitespace-pre-line text-gray-700">${job.desc}</div>`;
+                        card.innerHTML += `<button class="absolute top-2 right-2 text-gray-400 hover:text-red-600" title="删除" onclick="app.deleteJob(${job.id})"><i data-lucide='trash-2' class='h-5 w-5'></i></button>`;
+                        this.elements.jobList.appendChild(card);
+                    });
+                    lucide.createIcons();
+                },
+
+                // 删除岗位
+                deleteJob(id) {
+                    this.showConfirmModal('确定要删除这个收藏吗？', () => {
+                        let jobs = JSON.parse(localStorage.getItem('savedJobs')) || [];
+                        jobs = jobs.filter(job => job.id !== id);
+                        localStorage.setItem('savedJobs', JSON.stringify(jobs));
+                        this.renderJobs();
+                        this.showToast('已删除收藏');
+                    });
+                },
+
+                // 保存简历信息
+                saveProfile() {
+                    const form = this.elements.profileForm;
+                    const data = {};
+                    form.querySelectorAll('[data-key]').forEach(input => {
+                        data[input.getAttribute('data-key')] = input.value.trim();
+                    });
+                    localStorage.setItem('userProfile', JSON.stringify(data));
+                    this.renderProfile();
+                    this.showToast('信息已保存');
+                },
+
+                // 渲染简历信息
+                renderProfile() {
+                    const data = JSON.parse(localStorage.getItem('userProfile') || '{}');
+                    const form = this.elements.profileForm;
+                    form.querySelectorAll('[data-key]').forEach(input => {
+                        input.value = data[input.getAttribute('data-key')] || '';
+                    });
+                    // 生成可复制展示区
+                    document.getElementById('copyable-profile-display')?.remove();
+                    if (Object.keys(data).length > 0) {
+                        const displayContainer = document.createElement('div');
+                        displayContainer.id = 'copyable-profile-display';
+                        displayContainer.className = 'mt-6 card p-4 bg-gray-50';
+                        displayContainer.innerHTML = `<div class='flex justify-between items-center mb-2'><span class='font-semibold'>一键复制内容</span><button class='text-blue-500 hover:underline text-sm' id='copy-profile-btn'>复制</button></div><pre class='whitespace-pre-wrap text-gray-700 text-sm'>${this.profileText(data)}</pre>`;
+                        form.parentElement.parentElement.appendChild(displayContainer);
+                        document.getElementById('copy-profile-btn').onclick = () => {
+                            navigator.clipboard.writeText(this.profileText(data));
+                            this.showToast('已复制到剪贴板');
+                        };
+                    }
+                },
+
+                profileText(data) {
+                    return `姓名：${data.fullName || ''}\n电话：${data.phone || ''}\n邮箱：${data.email || ''}\n求职意向：${data.jobIntention || ''}\n\n教育背景：\n${data.education || ''}\n\n工作/实习经历：\n${data.experience || ''}\n\n自我评价：\n${data.selfEvaluation || ''}`;
+                },
+
+                // 导入简历
+                importResume(e) {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                        try {
+                            const data = JSON.parse(evt.target.result);
+                            if (typeof data === 'object') {
+                                localStorage.setItem('userProfile', JSON.stringify(data));
+                                this.renderProfile();
+                                this.showToast('简历导入成功');
+                            } else {
+                                this.showToast('文件格式错误');
+                            }
+                        } catch {
+                            this.showToast('文件格式错误');
+                        }
+                    };
+                    reader.readAsText(file);
+                },
+
+                // 清空所有数据
+                clearAllData() {
+                    this.showConfirmModal('警告：此操作将删除所有已保存的简历信息和岗位收藏，且无法恢复。您确定要继续吗？', () => {
+                        localStorage.removeItem('userProfile');
+                        localStorage.removeItem('savedJobs');
+                        this.elements.profileForm.reset();
+                        document.getElementById('copyable-profile-display')?.remove();
+                        this.renderJobs();
+                        this.showToast('所有数据已清空');
+                    });
+                },
+
+                // Toast
+                showToast(msg) {
+                    const toast = this.elements.toast;
+                    toast.textContent = msg;
+                    toast.classList.remove('opacity-0', '-translate-y-10');
+                    toast.classList.add('opacity-100', 'translate-y-0');
+                    setTimeout(() => {
+                        toast.classList.remove('opacity-100', 'translate-y-0');
+                        toast.classList.add('opacity-0', '-translate-y-10');
+                    }, 1800);
+                },
+
+                // 可复用的确认模态框
+                showConfirmModal(message, onConfirmCallback) {
+                    this.elements.confirmModalMessage.textContent = message;
+                    this.elements.confirmModal.classList.remove('hidden');
+                    // 通过克隆并替换按钮来移除旧的事件监听器，防止重复绑定
+                    const newConfirmBtn = this.elements.confirmModalConfirmBtn.cloneNode(true);
+                    this.elements.confirmModalConfirmBtn.parentNode.replaceChild(newConfirmBtn, this.elements.confirmModalConfirmBtn);
+                    this.elements.confirmModalConfirmBtn = newConfirmBtn;
+                    this.elements.confirmModalConfirmBtn.addEventListener('click', () => {
+                        onConfirmCallback();
+                        this.elements.confirmModal.classList.add('hidden');
+                    });
+                    lucide.createIcons();
+                }
+            };
+
+            // 让岗位卡片的删除按钮可用
+            window.app = app;
+            app.init();
+        });
+
