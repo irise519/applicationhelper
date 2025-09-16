@@ -1,0 +1,21 @@
+{
+  "name": "ResumeFiller - 一键网申助手",
+  "short_name": "ResumeFiller",
+  "description": "上传简历，收藏岗位，AI优化，一键填写，多设备同步",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4a6fa5",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
