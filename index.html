@@ -1,0 +1,458 @@
+```jsx
+import { useState, useEffect } from 'react';
+import { Home, FileText, Briefcase, Settings, LogIn, LogOut, User, Edit, Plus, Trash, Download, Menu, X } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+export default function App() {
+  const [currentPage, setCurrentPage] = useState('home');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
+  const [resumeData, setResumeData] = useState('');
+  const [jobs, setJobs] = useState([]);
+
+  useEffect(() => {
+    const savedResume = sessionStorage.getItem('resumeData');
+    if (savedResume) setResumeData(savedResume);
+    
+    const savedJobs = sessionStorage.getItem('jobs');
+    if (savedJobs) setJobs(JSON.parse(savedJobs));
+    
+    const savedLogin = sessionStorage.getItem('isLoggedIn');
+    if (savedLogin) {
+      setIsLoggedIn(true);
+      const savedUser = sessionStorage.getItem('user');
+      if (savedUser) setUser(JSON.parse(savedUser));
+    }
+  }, []);
+
+  const handleResumeUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const content = event.target.result;
+        setResumeData(content);
+        sessionStorage.setItem('resumeData', content);
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const handleAddJob = () => {
+    const newJob = {
+      id: Date.now(),
+      title: jobTitle,
+      company,
+      salary,
+      description
+    };
+    const updatedJobs = [...jobs, newJob];
+    setJobs(updatedJobs);
+    sessionStorage.setItem('jobs', JSON.stringify(updatedJobs));
+    setJobTitle('');
+    setCompany('');
+    setSalary('');
+    setDescription('');
+  };
+
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+    sessionStorage.setItem('isLoggedIn', 'true');
+    sessionStorage.setItem('user', JSON.stringify({ name: username }));
+    setUser({ name: username });
+    setCurrentPage('home');
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    sessionStorage.removeItem('isLoggedIn');
+    sessionStorage.removeItem('user');
+    setUser(null);
+  };
+
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [jobTitle, setJobTitle] = useState('');
+  const [company, setCompany] = useState('');
+  const [salary, setSalary] = useState('');
+  const [description, setDescription] = useState('');
+
+  const HomeContent = () => (
+    <div className="max-w-4xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6 text-gray-800">Welcome to JobApp Helper</h1>
+      <p className="text-gray-600 mb-8">Save your resume data and job bookmarks for quick application filling.</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100"
+        >
+          <div className="flex items-center mb-4">
+            <FileText className="text-blue-500 mr-3" size={24} />
+            <h3 className="text-xl font-semibold text-gray-800">Resume Management</h3>
+          </div>
+          <p className="text-gray-600 mb-4">Upload your resume to save details for one-click filling.</p>
+          <button 
+            onClick={() => setCurrentPage('resume')}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition"
+          >
+            Manage Resume
+          </button>
+        </motion.div>
+        
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100"
+        >
+          <div className="flex items-center mb-4">
+            <Briefcase className="text-green-500 mr-3" size={24} />
+            <h3 className="text-xl font-semibold text-gray-800">Job Bookmarks</h3>
+          </div>
+          <p className="text-gray-600 mb-4">Save job listings with details for quick reference.</p>
+          <button 
+            onClick={() => setCurrentPage('jobs')}
+            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition"
+          >
+            View Jobs
+          </button>
+        </motion.div>
+      </div>
+    </div>
+  );
+
+  const ResumeContent = () => (
+    <div className="max-w-4xl mx-auto">
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">Resume Management</h2>
+      <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-100">
+        <div className="flex items-center mb-4">
+          <FileText className="text-blue-500 mr-3" size={24} />
+          <h3 className="text-xl font-semibold">Upload Your Resume</h3>
+        </div>
+        <div className="mb-6">
+          <input
+            type="file"
+            accept=".txt,.pdf"
+            onChange={handleResumeUpload}
+            className="hidden"
+            id="resume-upload"
+          />
+          <label
+            htmlFor="resume-upload"
+            className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition flex items-center"
+          >
+            <Download className="mr-2" size={16} />
+            Upload Resume
+          </label>
+        </div>
+        <div className="mb-6">
+          <textarea
+            value={resumeData}
+            onChange={(e) => {
+              setResumeData(e.target.value);
+              sessionStorage.setItem('resumeData', e.target.value);
+            }}
+            className="w-full h-64 p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Resume content will appear here..."
+          />
+        </div>
+        <button
+          className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
+        >
+          Save Resume Data
+        </button>
+      </div>
+      
+      <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+        <div className="flex items-center mb-4">
+          <Edit className="text-purple-500 mr-3" size={24} />
+          <h3 className="text-xl font-semibold">Fill Application Form</h3>
+        </div>
+        <form className="space-y-4">
+          <div>
+            <label className="block text-gray-700 mb-1">Name</label>
+            <input
+              type="text"
+              className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 mb-1">Email</label>
+            <input
+              type="email"
+              className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 mb-1">Phone</label>
+            <input
+              type="tel"
+              className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <button
+            type="button"
+            className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition flex items-center"
+          >
+            <Download className="mr-2" size={16} />
+            Fill from Resume
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+
+  const JobsContent = () => (
+    <div className="max-w-4xl mx-auto">
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">Job Bookmarks</h2>
+      <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-100">
+        <div className="flex items-center mb-4">
+          <Briefcase className="text-green-500 mr-3" size={24} />
+          <h3 className="text-xl font-semibold">Add New Job</h3>
+        </div>
+        <form className="space-y-4">
+          <div>
+            <label className="block text-gray-700 mb-1">Job Title</label>
+            <input
+              type="text"
+              value={jobTitle}
+              onChange={(e) => setJobTitle(e.target.value)}
+              className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              placeholder="e.g., Senior Software Engineer"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 mb-1">Company</label>
+            <input
+              type="text"
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+              className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              placeholder="e.g., Tech Company Inc."
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 mb-1">Salary</label>
+            <input
+              type="text"
+              value={salary}
+              onChange={(e) => setSalary(e.target.value)}
+              className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              placeholder="e.g., $120,000/year"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 mb-1">Description</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              rows="3"
+              placeholder="Job description and requirements..."
+            />
+          </div>
+          <button
+            type="button"
+            onClick={handleAddJob}
+            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition flex items-center"
+          >
+            <Plus className="mr-2" size={16} />
+            Save Job
+          </button>
+        </form>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {jobs.map(job => (
+          <motion.div
+            key={job.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100"
+          >
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800">{job.title}</h3>
+                <p className="text-gray-600">{job.company}</p>
+                <p className="text-green-600 font-medium mt-1">{job.salary}</p>
+              </div>
+              <button className="text-red-500 hover:text-red-700">
+                <Trash size={20} />
+              </button>
+            </div>
+            <p className="text-gray-600 mb-4">{job.description}</p>
+            <button className="text-blue-500 hover:text-blue-700 flex items-center">
+              <Edit size={16} className="mr-1" />
+              Edit Details
+            </button>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const SettingsContent = () => (
+    <div className="max-w-4xl mx-auto">
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">Settings</h2>
+      <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">Theme</h3>
+            <div className="flex space-x-4">
+              <label className="flex items-center">
+                <input type="radio" name="theme" value="light" className="mr-2" checked />
+                Light Mode
+              </label>
+              <label className="flex items-center">
+                <input type="radio" name="theme" value="dark" className="mr-2" />
+                Dark Mode
+              </label>
+            </div>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">Notifications</h3>
+            <label className="flex items-center">
+              <input type="checkbox" className="mr-2" checked />
+              Enable job alerts
+            </label>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">Account</h3>
+            <button className="text-blue-500 hover:text-blue-700 flex items-center">
+              <User size={16} className="mr-1" />
+              Manage Account
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const LoginContent = () => (
+    <div className="max-w-md mx-auto">
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">Login</h2>
+      <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+        <div className="space-y-6">
+          <div>
+            <label className="block text-gray-700 mb-1">Username</label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 mb-1">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <button
+            onClick={handleLogin}
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition w-full"
+          >
+            Login
+          </button>
+          <p className="text-center text-gray-500">Don't have an account? <a href="#" className="text-blue-500 hover:underline">Sign up</a></p>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="flex h-screen bg-gray-50">
+      {/* Sidebar */}
+      <motion.div
+        initial={{ width: 0 }}
+        animate={{ width: isSidebarOpen ? '16rem' : '0' }}
+        transition={{ duration: 0.3 }}
+        className="bg-gradient-to-b from-gray-800 to-gray-900 text-white overflow-hidden"
+        style={{ width: isSidebarOpen ? '16rem' : '0' }}
+      >
+        <div className="p-4">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-xl font-bold">JobApp Helper</h1>
+            <button onClick={() => setIsSidebarOpen(false)} className="md:hidden">
+              <X size={24} />
+            </button>
+          </div>
+          <nav>
+            <button 
+              onClick={() => setCurrentPage('home')} 
+              className={`flex items-center p-2 rounded-lg w-full mb-2 transition ${currentPage === 'home' ? 'bg-blue-600' : 'hover:bg-gray-700'}`}
+            >
+              <Home className="mr-3" size={20} />
+              Home
+            </button>
+            <button 
+              onClick={() => setCurrentPage('resume')} 
+              className={`flex items-center p-2 rounded-lg w-full mb-2 transition ${currentPage === 'resume' ? 'bg-blue-600' : 'hover:bg-gray-700'}`}
+            >
+              <FileText className="mr-3" size={20} />
+              Resume
+            </button>
+            <button 
+              onClick={() => setCurrentPage('jobs')} 
+              className={`flex items-center p-2 rounded-lg w-full mb-2 transition ${currentPage === 'jobs' ? 'bg-blue-600' : 'hover:bg-gray-700'}`}
+            >
+              <Briefcase className="mr-3" size={20} />
+              Jobs
+            </button>
+            <button 
+              onClick={() => setCurrentPage('settings')} 
+              className={`flex items-center p-2 rounded-lg w-full mb-2 transition ${currentPage === 'settings' ? 'bg-blue-600' : 'hover:bg-gray-700'}`}
+            >
+              <Settings className="mr-3" size={20} />
+              Settings
+            </button>
+            {isLoggedIn ? (
+              <button 
+                onClick={handleLogout} 
+                className={`flex items-center p-2 rounded-lg w-full mb-2 transition hover:bg-gray-700`}
+              >
+                <LogOut className="mr-3" size={20} />
+                Logout
+              </button>
+            ) : (
+              <button 
+                onClick={() => setCurrentPage('login')} 
+                className={`flex items-center p-2 rounded-lg w-full mb-2 transition hover:bg-gray-700`}
+              >
+                <LogIn className="mr-3" size={20} />
+                Login
+              </button>
+            )}
+          </nav>
+        </div>
+      </motion.div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Mobile Header */}
+        <div className="md:hidden flex items-center justify-between p-4 border-b border-gray-200">
+          <button onClick={() => setIsSidebarOpen(true)} className="text-gray-600">
+            <Menu size={24} />
+          </button>
+          <h1 className="text-xl font-bold">JobApp Helper</h1>
+          <div className="w-8" />
+        </div>
+        
+        {/* Content Area */}
+        <div className="flex-1 p-6 overflow-auto">
+          {currentPage === 'home' && <HomeContent />}
+          {currentPage === 'resume' && <ResumeContent />}
+          {currentPage === 'jobs' && <JobsContent />}
+          {currentPage === 'settings' && <SettingsContent />}
+          {currentPage === 'login' && <LoginContent />}
+        </div>
+      </div>
+    </div>
+  );
+}
+```
