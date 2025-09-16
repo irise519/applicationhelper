@@ -1,3 +1,4 @@
+// ✅ 正确方式：使用全局 firebase 对象（与 <script> 标签兼容）
 // Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyCauAoMLbNCLuyh7_acwVuhVsucP7glKvI",
@@ -9,7 +10,7 @@ const firebaseConfig = {
   measurementId: "G-S6WCZ3RGJJ"
 };
 
-// Initialize Firebase
+// ✅ 使用全局 firebase 对象初始化（不是 import）
 const app = firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
