@@ -1,0 +1,358 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --primary: #4a6fa5;
+  --secondary: #166088;
+  --light: #f8f9fa;
+  --dark: #343a40;
+  --success: #28a745;
+  --text: #333;
+  --shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--light);
+  color: var(--text);
+  display: flex;
+  min-height: 100vh;
+}
+
+/* 侧边栏 */
+#sidebar {
+  width: 240px;
+  background: var(--secondary);
+  color: white;
+  padding: 1.5rem 1rem;
+  position: fixed;
+  height: 100vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.logo i {
+  color: var(--primary);
+}
+
+nav ul {
+  list-style: none;
+}
+
+nav a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 15px;
+  margin: 5px 0;
+  border-radius: 8px;
+  text-decoration: none;
+  color: rgba(255,255,255,0.8);
+  transition: all 0.3s;
+}
+
+nav a:hover,
+nav a.active {
+  background-color: rgba(255,255,255,0.1);
+  color: white;
+}
+
+.logout {
+  position: absolute;
+  bottom: 2rem;
+  left: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: rgba(255,255,255,0.7);
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.logout:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
+/* 主内容区 */
+#main-content {
+  flex: 1;
+  margin-left: 240px;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.page {
+  display: none;
+  animation: fadeIn 0.5s;
+}
+
+.page.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+h1 {
+  margin-bottom: 1.5rem;
+  color: var(--secondary);
+}
+
+.card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  margin-bottom: 2rem;
+}
+
+.card h3 {
+  margin-bottom: 1rem;
+  color: var(--dark);
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-right: 1rem;
+  transition: background 0.3s;
+}
+
+.btn-primary:hover {
+  background: var(--secondary);
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.3s;
+}
+
+.btn-secondary:hover {
+  background: #5a6268;
+}
+
+.stats {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.stats div {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  text-align: center;
+  min-width: 100px;
+}
+
+.stats strong {
+  font-size: 1.8rem;
+  color: var(--primary);
+}
+
+/* 列表 */
+.resume-list, .job-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.item-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  border-left: 4px solid var(--primary);
+  position: relative;
+}
+
+.item-card h3 {
+  margin-bottom: 0.5rem;
+  color: var(--dark);
+}
+
+.item-card p {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.item-card .delete-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.item-card .fill-btn {
+  background: var(--success);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--dark);
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+/* 模态框 */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  width: 90%;
+  max-width: 500px;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  position: relative;
+  padding: 2rem;
+}
+
+.close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #aaa;
+}
+
+.close:hover {
+  color: #000;
+}
+
+#modal-title {
+  margin-bottom: 1.5rem;
+  color: var(--secondary);
+}
+
+#modal-body textarea {
+  width: 100%;
+  height: 120px;
+  margin-top: 1rem;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  resize: vertical;
+}
+
+/* 暗色主题 */
+body.dark-mode {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+body.dark-mode #sidebar {
+  background: #1e1e1e;
+}
+
+body.dark-mode .card,
+body.dark-mode .item-card,
+body.dark-mode .modal-content {
+  background: #1e1e1e;
+  color: #e0e0e0;
+}
+
+body.dark-mode .form-group input,
+body.dark-mode .form-group select {
+  background: #2d2d2d;
+  color: #e0e0e0;
+  border-color: #444;
+}
+
+body.dark-mode nav a {
+  color: #ccc;
+}
+
+body.dark-mode nav a:hover,
+body.dark-mode nav a.active {
+  background-color: #333;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  #sidebar {
+    width: 70px;
+    padding: 1.5rem 0.5rem;
+  }
+  #sidebar .logo h2,
+  #sidebar nav ul li span {
+    display: none;
+  }
+  #sidebar .logo i {
+    font-size: 1.8rem;
+  }
+  #main-content {
+    margin-left: 70px;
+  }
+}
