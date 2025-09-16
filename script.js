@@ -1,12 +1,3 @@
-// =================================================================
-// 🚨 安全警告：Firebase 配置
-// =================================================================
-// 永远不要将 API Key 等敏感信息直接写在代码里。
-// 请使用环境变量来管理这些配置。
-// 下面的示例使用了 Vite 的 `import.meta.env` 格式，你可以根据你的构建工具进行调整。
-// 在部署时（如 Vercel, Netlify），你需要在平台的设置中配置这些环境变量。
-// 同时，请务必在 Firebase 控制台设置严格的 Firestore 安全规则，以保护你的数据。
-
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY, // 例如: "AIza..."
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN, // 例如: "iainfo-5ef0b.firebaseapp.com"
